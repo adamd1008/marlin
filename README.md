@@ -47,7 +47,7 @@ Marlin supports hexdumping of arbitrary binary strings and null-terminated strin
 
 ### `lua_simple1.lua`
 
-The Lua library supports all the functionality of the C library!
+The Lua library supports all the functionality of the C library (excluding memory allocation functions)!
 
     [    0.000004] <@lua_simple1.lua:25> "(top level)" INFO: Log library started
     [    0.000015] <@lua_simple1.lua:25> "(top level)" INFO: loglevels mask: 0x0000ffff
