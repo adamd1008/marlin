@@ -50,9 +50,9 @@ Marlin supports hexdumping of arbitrary binary strings and null-terminated strin
 The Lua library supports all the functionality of the C library!
 
     [    0.000004] <@lua_simple1.lua:25> "(top level)" INFO: Log library started
-    [    0.000015] <@lua_simple1.lua:25> "(top level)" INFO: loglevels mask:    0x0000ffff
+    [    0.000015] <@lua_simple1.lua:25> "(top level)" INFO: loglevels mask: 0x0000ffff
     [    0.000028] <@lua_simple1.lua:27> "(top level)" INFO: Hello world!
-    [    0.000030] <@lua_simple1.lua:28> "(top level)" WARN: Warning! High      voltage!
+    [    0.000030] <@lua_simple1.lua:28> "(top level)" WARN: Warning! High voltage!
     [    0.000031] <@lua_simple1.lua:30> "(top level)" ERR : HEX (8 bytes)
     --BEGIN_HEX--
     00000000  48 65 6c 6c 43 21 fe 23                           |HellC!.#|
