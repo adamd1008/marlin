@@ -28,6 +28,10 @@ int main()
     * may as well use it if you don't plan to have multiple handles. */
    m_logHandle = m_logInit(NULL, LOG_ARGS, LOG_ALL, LOG_FLAG_ALL);
    
+   /* Note the use of the macro `LOG_ARGS' - this contains the source file, line
+    * and function, in that order and passes them as the three arguments used
+    * by most functions. */
+   
    m_logPrint(m_logHandle, LOG_ARGS, LOG_INFO, "Hello world! My name is (%s)!",
               "Adam");
    
