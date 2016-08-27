@@ -102,8 +102,8 @@ logTime_t m_timeSub(logTime_t timeNow, logTime_t timeAtStart)
    
    if (ret.usec < 0)
    {
-      ret.usec = 1000000 + ret.usec;
-      ret.sec -= 1;
+      ret.usec += 1000000;
+      ret.sec--;
    }
 
    return ret;
