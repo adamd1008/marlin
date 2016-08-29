@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-std=c99 -g -c -Wall -Wextra -Werror -rdynamic -fPIC
+CFLAGS=-ansi -g -c -Wall -Wextra -pedantic -Werror -rdynamic -fPIC
 LIB_C_SOURCES=log.c
 LIB_C_OBJECTS=$(LIB_C_SOURCES:.c=.o)
 LIB_DIR=../lib

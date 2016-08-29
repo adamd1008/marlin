@@ -386,6 +386,10 @@ void m_logBacktrace(const log_t* handle, const char* file, const int line,
    HANDLE process;
    unsigned short frames;
    SYMBOL_INFO* symbol;
+#elif defined(__linux)
+   void* buf[128];
+   int nptrs, i;
+   char** strings;
 #endif
    
    logTime_t tv = m_timeNow();
@@ -406,11 +410,9 @@ void m_logBacktrace(const log_t* handle, const char* file, const int line,
    fprintf(handle->logFile, "--BEGIN_BACKTRACE--\n");
 
 #ifdef __linux
-   void* buf[128];
-   int nptrs = backtrace(buf, 128);
+   nptrs = backtrace(buf, 128);
    
-   char** strings = backtrace_symbols(buf, nptrs);
-   int i;
+   strings = backtrace_symbols(buf, nptrs);
    
    for (i = 0; i < nptrs; i++)
       fprintf(handle->logFile, "%s\n", strings[i]);
