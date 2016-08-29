@@ -23,22 +23,11 @@
 #ifndef _PANIC_LOG_H_
 #define _PANIC_LOG_H_
 
+#include <stdio.h>
 #include <stdlib.h>
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-
-#ifdef __cplusplus
-}
-#endif
-
 #ifdef __linux
+#include <linux/limits.h>
 #include <sys/time.h>
 #elif defined(_WIN32)
 #include <Windows.h>
