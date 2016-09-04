@@ -161,13 +161,13 @@ int Lua_Log::_init(lua_State* L)
    if (argc == 3)
    {
       fileName = luaL_checkstring(L, 1);
-      logLevels = luaL_checkint(L, 2);
-      logFlags = luaL_checkint(L, 3);
+      logLevels = static_cast<int>(luaL_checkinteger(L, 2));
+      logFlags = static_cast<int>(luaL_checkinteger(L, 3));
    }
    else
    {
-      logLevels = luaL_checkint(L, 1);
-      logFlags = luaL_checkint(L, 2);
+      logLevels = static_cast<int>(luaL_checkinteger(L, 1));
+      logFlags = static_cast<int>(luaL_checkinteger(L, 2));
    }
    
    Lua_Log* ret = static_cast<Lua_Log*>(
@@ -212,7 +212,7 @@ int Lua_Log::_print(lua_State* L)
    
    if (argc == 3)
    {
-      logLevel = luaL_checkint(L, 2);
+      logLevel = static_cast<int>(luaL_checkinteger(L, 2));
       str = luaL_checkstring(L, 3);
    }
    else
@@ -250,7 +250,7 @@ int Lua_Log::_hexdump(lua_State* L)
    
    if (argc == 3)
    {
-      logLevel = luaL_checkint(L, 2);
+      logLevel = static_cast<int>(luaL_checkinteger(L, 2));
       str = lua_tolstring(L, 3, &len);
    }
    else
@@ -285,7 +285,7 @@ int Lua_Log::_exit(lua_State* L)
          luaL_checkudata(L, 1, MARLIN_LUA_LOG_METATABLE));
    
    if (argc == 2)
-      exitCode = luaL_checkint(L, 2);
+      exitCode = static_cast<int>(luaL_checkinteger(L, 2));
    
    lua_Debug debug;
    Lua_Utl::getDebug(L, &debug);

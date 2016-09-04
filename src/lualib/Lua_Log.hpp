@@ -68,7 +68,15 @@ private:
    bool _free;
 };
 
-extern "C" int luaopen_libmarlinlua(lua_State* L);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int luaopen_libmarlinlua(lua_State* L);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* LUA_LOG_HPP */
 

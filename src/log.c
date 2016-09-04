@@ -39,9 +39,17 @@
 #include <unistd.h>
 #elif defined(_WIN32)
 #include <DbgHelp.h>
+
+#ifndef PATH_MAX
+#define PATH_MAX 256
+#endif
 #endif
 
+#ifdef __linux
 #define LOG_MAX_LEN PIPE_BUF
+#elif defined(_WIN32)
+#define LOG_MAX_LEN 1024
+#endif
 
 /* Shortcut macros */
 #define LOG_PTR_IS_LL(x)   ((handle->logLevels & x) == x)
