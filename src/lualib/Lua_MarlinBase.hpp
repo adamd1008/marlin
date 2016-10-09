@@ -25,5 +25,9 @@
 
 #include <lua.hpp>
 
+#ifndef LUA_OK
+#define LUA_OK 0
+#endif
+
 #endif /* LUA_MARLINBASE_HPP */
 
