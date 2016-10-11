@@ -32,6 +32,14 @@
 #include <sys/stat.h>
 
 #include <fcntl.h>
+
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4091)
+#pragma warning(disable: 4477)
+#pragma warning(disable: 4996)
+#endif
+
 #include "log.h"
 
 #ifdef __linux
@@ -67,11 +75,6 @@ static const char* const logLevelL1Str   = "L1  ";
 static const char* const logLevelL2Str   = "L2  ";
 static const char* const logLevelL3Str   = "L3  ";
 static const char* const logLevelUnknStr = "UNKN";
-
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4996)
-#endif
 
 logTime_t m_timeNow()
 {
@@ -257,7 +260,7 @@ void m_logPrint(const log_t* handle, const char* file, const int line,
 
 void m_logHexdump(const log_t* handle, const char* file, const int line,
                   const char* func, const int logLevel, const char* str,
-                  const int len)
+                  const size_t len)
 {
    char logLevelStr[8];
    int i, j;
@@ -274,13 +277,13 @@ void m_logHexdump(const log_t* handle, const char* file, const int line,
       if (LOG_PTR_IS_FLAG(LOG_FLAG_SRC_INFO))
       {
          fprintf(handle->logFile,
-                 "[%5ld.%.06ld] <%s:%d> \"%s\" %s: HEX (%d bytes)\n",
+                 "[%5ld.%.06ld] <%s:%d> \"%s\" %s: HEX (%u bytes)\n",
                  (long int) tv.sec, (long int) tv.usec, file, line,
                  func, logLevelStr, len);
       }
       else
       {
-         fprintf(handle->logFile, "[%5ld.%.06ld] \"%s\" %s: HEX (%d bytes)\n",
+         fprintf(handle->logFile, "[%5ld.%.06ld] \"%s\" %s: HEX (%u bytes)\n",
                  (long int) tv.sec, (long int) tv.usec, func,
                  logLevelStr, len);
       }
