@@ -69,11 +69,11 @@ log_t* m_logHandle = NULL;
 
 static const char* const logLevelInfoStr = "INFO";
 static const char* const logLevelWarnStr = "WARN";
-static const char* const logLevelErrStr  = "ERR ";
-static const char* const logLevelBugStr  = "BUG ";
-static const char* const logLevelL1Str   = "L1  ";
-static const char* const logLevelL2Str   = "L2  ";
-static const char* const logLevelL3Str   = "L3  ";
+static const char* const logLevelErrStr  = " ERR";
+static const char* const logLevelBugStr  = " BUG";
+static const char* const logLevelL1Str   = "  L1";
+static const char* const logLevelL2Str   = "  L2";
+static const char* const logLevelL3Str   = "  L3";
 static const char* const logLevelUnknStr = "UNKN";
 
 logTime_t m_timeNow()
@@ -263,7 +263,7 @@ void m_logHexdump(const log_t* handle, const char* file, const int line,
                   const size_t len)
 {
    char logLevelStr[8];
-   int i, j;
+   size_t i, j;
    logTime_t tv;
    
    if (LOG_PTR_IS_LL(logLevel))
@@ -330,7 +330,7 @@ void m_logHexdump(const log_t* handle, const char* file, const int line,
       if ((i % 16) != 0)
       {
          /* Calculate the number of spaces to add to the ASCII area */
-         int spaces = (16 - (i % 16)) * 3 + 1;
+         size_t spaces = (16 - (i % 16)) * 3 + 1;
          
          if ((i % 16) < 8)
             spaces++;
