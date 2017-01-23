@@ -124,7 +124,7 @@ void m_logPrint(const log_t* handle, const char* file, const int line,
  */
 void m_logHexdump(const log_t* handle, const char* file, const int line,
                   const char* func, const int logLevel, const char* str,
-                  const size_t len);
+                  const unsigned int len);
 
 /**
  * Wrapper for logHexdump() for null-terminated strings

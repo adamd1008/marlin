@@ -260,10 +260,10 @@ void m_logPrint(const log_t* handle, const char* file, const int line,
 
 void m_logHexdump(const log_t* handle, const char* file, const int line,
                   const char* func, const int logLevel, const char* str,
-                  const size_t len)
+                  const unsigned int len)
 {
    char logLevelStr[8];
-   size_t i, j;
+   unsigned int i, j;
    logTime_t tv;
    
    if (LOG_PTR_IS_LL(logLevel))
@@ -330,7 +330,7 @@ void m_logHexdump(const log_t* handle, const char* file, const int line,
       if ((i % 16) != 0)
       {
          /* Calculate the number of spaces to add to the ASCII area */
-         size_t spaces = (16 - (i % 16)) * 3 + 1;
+         unsigned int spaces = (16 - (i % 16)) * 3 + 1;
          
          if ((i % 16) < 8)
             spaces++;
