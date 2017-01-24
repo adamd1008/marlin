@@ -28,35 +28,36 @@
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #include <fcntl.h>
 
 #ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4091)
-#pragma warning(disable: 4477)
-#pragma warning(disable: 4996)
+# pragma warning(push)
+# pragma warning(disable: 4091)
+# pragma warning(disable: 4477)
+# pragma warning(disable: 4996)
 #endif
 
 #include "log.h"
 
 #ifdef __linux
-#include <execinfo.h>
-#include <unistd.h>
+# include <execinfo.h>
+# include <unistd.h>
 #elif defined(_WIN32)
-#include <DbgHelp.h>
+# include <DbgHelp.h>
 
-#ifndef PATH_MAX
-#define PATH_MAX 256
-#endif
+# ifndef PATH_MAX
+#  define PATH_MAX 256
+# endif
 #endif
 
 #ifdef __linux
-#define LOG_MAX_LEN PIPE_BUF
+# define LOG_MAX_LEN PIPE_BUF
 #elif defined(_WIN32)
-#define LOG_MAX_LEN 1024
+# define LOG_MAX_LEN 1024
 #endif
 
 /* Shortcut macros */
@@ -118,6 +119,125 @@ logTime_t m_timeSub(logTime_t timeNow, logTime_t timeAtStart)
    }
 
    return ret;
+}
+
+const char* _logGetLogLevelStr(const int logLevel)
+{
+   const char* ret = logLevelUnknStr;
+   
+   switch (logLevel)
+   {
+      case LOG_INFO:
+         ret = logLevelInfoStr;
+         break;
+      case LOG_WARN:
+         ret = logLevelWarnStr;
+         break;
+      case LOG_ERR:
+         ret = logLevelErrStr;
+         break;
+      case LOG_BUG:
+         ret = logLevelBugStr;
+         break;
+      case LOG_L1:
+         ret = logLevelL1Str;
+         break;
+      case LOG_L2:
+         ret = logLevelL2Str;
+         break;
+      case LOG_L3:
+         ret = logLevelL3Str;
+         break;
+      default:
+         break;
+   }
+   
+   return ret;
+}
+
+void _logPrintHeader(const log_t* handle, const char* file, const int line,
+                     const char* func, const int logLevel)
+{
+   char logLevelStr[8];
+   logTime_t tv;
+   logTime_t timeNow;
+   struct tm* fullDateTime;
+   char fullDateTimeStr[30];
+   
+   if (LOG_PTR_IS_LL(logLevel))
+   {
+      strncpy(logLevelStr, _logGetLogLevelStr(logLevel), 8);
+      logLevelStr[7] = 0;
+      
+      tv = m_timeNow();
+      timeNow = tv;
+      tv = m_timeSub(tv, handle->timeAtStart);
+      
+      if (LOG_PTR_IS_FLAG(LOG_FLAG_LONG_MSG))
+      {
+         if ((fprintf(handle->logFile,
+                      "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+                      ">>>>>>>>>>>>>>>>>>>>>>>>>>>\n")) < 0)
+            abort();
+         
+         fullDateTime = localtime(&timeNow.sec);
+         strftime(fullDateTimeStr, 30, "%Y/%m/%d %H:%M:%S", fullDateTime);
+         
+         if (LOG_PTR_IS_FLAG(LOG_FLAG_SRC_INFO))
+         {
+            
+            if ((fprintf(handle->logFile,
+                         "[%5ld.%.06ld] <%s:%d> \"%s\" [%s.%.06ld] %s\n",
+                         tv.sec, tv.usec, file, line, func, fullDateTimeStr,
+                         timeNow.usec, logLevelStr)) < 0)
+               abort();
+         }
+         else
+         {
+            if ((fprintf(handle->logFile,
+                         "[%5ld.%.06ld] \"%s\" [%s.%.06ld] %s\n", tv.sec,
+                         tv.usec, func, fullDateTimeStr, timeNow.usec,
+                         logLevelStr)) < 0)
+               abort();
+         }
+         
+         if ((fprintf(handle->logFile,
+                      "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+                      "<<<<<<<<<<<<<<<<<<<<<<<<<<<\n")) < 0)
+            abort();
+      }
+      else
+      {
+         if (LOG_PTR_IS_FLAG(LOG_FLAG_SRC_INFO))
+         {
+            if ((fprintf(handle->logFile,
+                         "[%5ld.%.06ld] <%s:%d> \"%s\" %s: ", tv.sec, tv.usec,
+                         file, line, func, logLevelStr)) < 0)
+               abort();
+         }
+         else
+         {
+            if ((fprintf(handle->logFile,
+                         "[%5ld.%.06ld] \"%s\" %s: ", tv.sec, tv.usec, func,
+                         logLevelStr)) < 0)
+               abort();
+         }
+      }
+   }
+}
+
+void _logPrintBody(const log_t* handle, const char* fmt, va_list ap)
+{
+   char logEntry[LOG_MAX_LEN];
+   
+   vsnprintf(logEntry, LOG_MAX_LEN, fmt, ap);
+   fprintf(handle->logFile, "%s\n", logEntry);
+}
+
+void _logPrintFooter(const log_t* handle)
+{
+   if (LOG_PTR_IS_FLAG(LOG_FLAG_LONG_MSG))
+      fprintf(handle->logFile, "\n");
 }
 
 log_t* m_logInit(const char* fileName, const char* file, const int line,
@@ -186,76 +306,38 @@ log_t* m_logInit(const char* fileName, const char* file, const int line,
    return handle;
 }
 
-const char* _logGetLogLevelStr(const int logLevel)
-{
-   const char* ret = logLevelUnknStr;
-   
-   switch (logLevel)
-   {
-      case LOG_INFO:
-         ret = logLevelInfoStr;
-         break;
-      case LOG_WARN:
-         ret = logLevelWarnStr;
-         break;
-      case LOG_ERR:
-         ret = logLevelErrStr;
-         break;
-      case LOG_BUG:
-         ret = logLevelBugStr;
-         break;
-      case LOG_L1:
-         ret = logLevelL1Str;
-         break;
-      case LOG_L2:
-         ret = logLevelL2Str;
-         break;
-      case LOG_L3:
-         ret = logLevelL3Str;
-         break;
-      default:
-         break;
-   }
-   
-   return ret;
-}
-
 void m_logPrint(const log_t* handle, const char* file, const int line,
                 const char* func, const int logLevel, const char* fmt, ...)
 {
    va_list ap;
-   char logLevelStr[8];
-   char logEntry[LOG_MAX_LEN];
-   logTime_t tv;
    
-   if (LOG_PTR_IS_LL(logLevel))
-   {
-      strncpy(logLevelStr, _logGetLogLevelStr(logLevel), 8);
-      logLevelStr[7] = 0;
-      
-      va_start(ap, fmt);
-      vsnprintf(logEntry, LOG_MAX_LEN, fmt, ap);
-      va_end(ap);
-      
-      tv = m_timeNow();
-      tv = m_timeSub(tv, handle->timeAtStart);
-      
-      if (LOG_PTR_IS_FLAG(LOG_FLAG_SRC_INFO))
-      {
-         if ((fprintf(handle->logFile,
-                      "[%5ld.%.06ld] <%s:%d> \"%s\" %s: %s\n",
-                      tv.sec, tv.usec, file, line, func, logLevelStr,
-                      logEntry)) < 0)
-            abort();
-      }
-      else
-      {
-         if ((fprintf(handle->logFile,
-                      "[%5ld.%.06ld] \"%s\" %s: %s\n",
-                      tv.sec, tv.usec, func, logLevelStr, logEntry)) < 0)
-            abort();
-      }
-   }
+   _logPrintHeader(handle, file, line, func, logLevel);
+   
+   va_start(ap, fmt);
+   _logPrintBody(handle, fmt, ap);
+   va_end(ap);
+   
+   _logPrintFooter(handle);
+}
+
+void m_logPrintHeader(const log_t* handle, const char* file, const int line,
+                      const char* func, const int logLevel)
+{
+   _logPrintHeader(handle, file, line, func, logLevel);
+}
+
+void m_logPrintBody(const log_t* handle, const char* fmt, ...)
+{
+   va_list ap;
+   
+   va_start(ap, fmt);
+   _logPrintBody(handle, fmt, ap);
+   va_end(ap);
+}
+
+void m_logPrintFooter(const log_t* handle)
+{
+   _logPrintFooter(handle);
 }
 
 void m_logHexdump(const log_t* handle, const char* file, const int line,
@@ -265,6 +347,9 @@ void m_logHexdump(const log_t* handle, const char* file, const int line,
    char logLevelStr[8];
    unsigned int i, j;
    logTime_t tv;
+   logTime_t timeNow;
+   struct tm* fullDateTime;
+   char fullDateTimeStr[30];
    
    if (LOG_PTR_IS_LL(logLevel))
    {
@@ -272,23 +357,55 @@ void m_logHexdump(const log_t* handle, const char* file, const int line,
       logLevelStr[7] = 0;
 
       tv = m_timeNow();
+      timeNow = tv;
       tv = m_timeSub(tv, handle->timeAtStart);
       
-      if (LOG_PTR_IS_FLAG(LOG_FLAG_SRC_INFO))
+      if (LOG_PTR_IS_FLAG(LOG_FLAG_LONG_MSG))
       {
-         fprintf(handle->logFile,
-                 "[%5ld.%.06ld] <%s:%d> \"%s\" %s: HEX (%u bytes)\n",
-                 (long int) tv.sec, (long int) tv.usec, file, line,
-                 func, logLevelStr, len);
+         if ((fprintf(handle->logFile,
+                      "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+                      ">>>>>>>>>>>>>>>>>>>>>>>>>>>\n")) < 0)
+            abort();
+         
+         fullDateTime = localtime(&timeNow.sec);
+         strftime(fullDateTimeStr, 30, "%Y/%m/%d %H:%M:%S", fullDateTime);
+         
+         if (LOG_PTR_IS_FLAG(LOG_FLAG_SRC_INFO))
+         {
+            if ((fprintf(handle->logFile,
+                         "[%5ld.%.06ld] <%s:%d> \"%s\" [%s.%.06ld] %s: HEX\n"
+                         "(%u bytes)\n", tv.sec, tv.usec, file, line, func,
+                         fullDateTimeStr, timeNow.usec, logLevelStr, len)) < 0)
+               abort();
+         }
+         else
+         {
+            if ((fprintf(handle->logFile,
+                         "[%5ld.%.06ld] \"%s\" [%s.%.06ld] %s: HEX\n"
+                         "(%u bytes)\n", tv.sec, tv.usec, func,
+                         fullDateTimeStr, timeNow.usec, logLevelStr, len)) < 0)
+               abort();
+         }
+         
+         if ((fprintf(handle->logFile,
+                      "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+                      "<<<<<<<<<<<<<<<<<<<<<<<<<<<")) < 0)
+            abort();
       }
       else
       {
-         fprintf(handle->logFile, "[%5ld.%.06ld] \"%s\" %s: HEX (%u bytes)\n",
-                 (long int) tv.sec, (long int) tv.usec, func,
-                 logLevelStr, len);
+         if (LOG_PTR_IS_FLAG(LOG_FLAG_SRC_INFO))
+         {
+            fprintf(handle->logFile,
+                    "[%5ld.%.06ld] <%s:%d> \"%s\" %s: HEX\n(%u bytes)\n",
+                    tv.sec, tv.usec, file, line, func, logLevelStr, len);
+         }
+         else
+         {
+            fprintf(handle->logFile, "[%5ld.%.06ld] \"%s\" %s: HEX\n"
+                    "(%u bytes)\n", tv.sec, tv.usec, func, logLevelStr, len);
+         }
       }
-      
-      fprintf(handle->logFile, "--BEGIN_HEX--");
       
       for (i = 0; i < len; i++)
       {
@@ -350,7 +467,7 @@ void m_logHexdump(const log_t* handle, const char* file, const int line,
          fputc('|', handle->logFile);
       }
       
-      fprintf(handle->logFile, "\n%.08x\n---END_HEX---\n", i);
+      printf("\n\n");
    }
 }
 

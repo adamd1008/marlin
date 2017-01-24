@@ -43,16 +43,18 @@
 #define LOG_L3                0x0040
 #define LOG_ALL               0xffff
 
-#define LOG_FLAG_NONE            0x00
-#define LOG_FLAG_CLOEXEC         0x01
+#define LOG_FLAG_NONE            0x0000
+#define LOG_FLAG_CLOEXEC         0x0001
 /* Log sets the CLOEXEC flag on its out file */
-#define LOG_FLAG_SRC_INFO        0x02
+#define LOG_FLAG_SRC_INFO        0x0002
 /* Log also prints out file and line at call! */
-#define LOG_FLAG_STDOUT          0x04
+#define LOG_FLAG_STDOUT          0x0004
 /* When no log file is specified, output to stdout instead */
-#define LOG_FLAG_ENABLE_ASSERTS  0x08
+#define LOG_FLAG_ENABLE_ASSERTS  0x0008
 /* Asserts are active with this flag set */
-#define LOG_FLAG_ALL             0xff
+#define LOG_FLAG_LONG_MSG        0x0010
+/* Print large messags with better layout and more date & time info */
+#define LOG_FLAG_ALL             0xffff
 
 /* Can't use a variadic macro in conjunction with a variadic function, so sadly
    you need to explicitly type __FILE__ and __LINE__, so use this shortcut! */
@@ -79,9 +81,6 @@ extern "C" {
 
 extern log_t* m_logHandle;
 
-logTime_t m_timeNow();
-logTime_t m_timeSub(logTime_t timeNow, logTime_t timeAtStart);
-
 /**
  * Initialise a new logging instance
  * 
@@ -107,6 +106,41 @@ log_t* m_logInit(const char* fileName, const char* file, const int line,
  */
 void m_logPrint(const log_t* handle, const char* file, const int line,
                 const char* func, const int logLevel, const char* fmt, ...);
+
+/**
+ * Print the header of a log message; use `m_logPrintBody()` and
+ * `m_logPrintFooter()` to construct the full log message
+ * 
+ * @param handle   Log handle pointer
+ * @param file     Source file name (__FILE__ from LOG_ARGS)
+ * @param line     Source line number (__LINE__ from LOG_ARGS)
+ * @param func     Current function (__func__ from LOG_ARGS)
+ * @param logLevel Log level of this message
+ */
+void m_logPrintHeader(const log_t* handle, const char* file, const int line,
+                      const char* func, const int logLevel);
+
+/**
+ * Segmented print to the log file
+ * 
+ * @param handle   Log handle pointer
+ * @param fmt      Variadic message format
+ * @param ...      Variadic arguments
+ */
+void m_logPrintBody(const log_t* handle, const char* fmt, ...);
+
+/**
+ * Finalise a segmented log message
+ * 
+ * @param handle   Log handle pointer
+ * @param file     Source file name (__FILE__ from LOG_ARGS)
+ * @param line     Source line number (__LINE__ from LOG_ARGS)
+ * @param func     Current function (__func__ from LOG_ARGS)
+ * @param logLevel Log level of this message
+ * @param fmt      Variadic message format
+ * @param ...      Variadic arguments
+ */
+void m_logPrintFooter(const log_t* handle);
 
 /**
  * Print a hexdump of the given string to the log file
