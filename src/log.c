@@ -344,131 +344,74 @@ void m_logHexdump(const log_t* handle, const char* file, const int line,
                   const char* func, const int logLevel, const char* str,
                   const unsigned int len)
 {
-   char logLevelStr[8];
    unsigned int i, j;
-   logTime_t tv;
-   logTime_t timeNow;
-   struct tm* fullDateTime;
-   char fullDateTimeStr[30];
    
-   if (LOG_PTR_IS_LL(logLevel))
+   _logPrintHeader(handle, file, line, func, logLevel);
+   m_logPrintBody(handle, "HEX (%u bytes)", len);
+   
+   for (i = 0; i < len; i++)
    {
-      strncpy(logLevelStr, _logGetLogLevelStr(logLevel), 8);
-      logLevelStr[7] = 0;
-
-      tv = m_timeNow();
-      timeNow = tv;
-      tv = m_timeSub(tv, handle->timeAtStart);
+      if ((i % 16) == 0)
+         fprintf(handle->logFile, "\n%.08x  ", i);
       
-      if (LOG_PTR_IS_FLAG(LOG_FLAG_LONG_MSG))
-      {
-         if ((fprintf(handle->logFile,
-                      "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-                      ">>>>>>>>>>>>>>>>>>>>>>>>>>>\n")) < 0)
-            abort();
-         
-         fullDateTime = localtime(&timeNow.sec);
-         strftime(fullDateTimeStr, 30, "%Y/%m/%d %H:%M:%S", fullDateTime);
-         
-         if (LOG_PTR_IS_FLAG(LOG_FLAG_SRC_INFO))
-         {
-            if ((fprintf(handle->logFile,
-                         "[%5ld.%.06ld] <%s:%d> \"%s\" [%s.%.06ld] %s: HEX\n"
-                         "(%u bytes)\n", tv.sec, tv.usec, file, line, func,
-                         fullDateTimeStr, timeNow.usec, logLevelStr, len)) < 0)
-               abort();
-         }
-         else
-         {
-            if ((fprintf(handle->logFile,
-                         "[%5ld.%.06ld] \"%s\" [%s.%.06ld] %s: HEX\n"
-                         "(%u bytes)\n", tv.sec, tv.usec, func,
-                         fullDateTimeStr, timeNow.usec, logLevelStr, len)) < 0)
-               abort();
-         }
-         
-         if ((fprintf(handle->logFile,
-                      "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
-                      "<<<<<<<<<<<<<<<<<<<<<<<<<<<")) < 0)
-            abort();
-      }
-      else
-      {
-         if (LOG_PTR_IS_FLAG(LOG_FLAG_SRC_INFO))
-         {
-            fprintf(handle->logFile,
-                    "[%5ld.%.06ld] <%s:%d> \"%s\" %s: HEX\n(%u bytes)\n",
-                    tv.sec, tv.usec, file, line, func, logLevelStr, len);
-         }
-         else
-         {
-            fprintf(handle->logFile, "[%5ld.%.06ld] \"%s\" %s: HEX\n"
-                    "(%u bytes)\n", tv.sec, tv.usec, func, logLevelStr, len);
-         }
-      }
+      /* ISO C90 does not support the 'hh' length modifier, so use this
+       * interesting solution...
+       * 
+       * XXX Will this work on big endian systems?
+       */
+      fprintf(handle->logFile, "%.02hx ", str[i] & 0xff);
       
-      for (i = 0; i < len; i++)
+      if (i > 0)
       {
-         if ((i % 16) == 0)
-            fprintf(handle->logFile, "\n%.08x  ", i);
-         
-         /* ISO C90 does not support the 'hh' length modifier, so use this
-          * interesting solution...
-          * 
-          * XXX Will this work on big endian systems?
-          */
-         fprintf(handle->logFile, "%.02hx ", str[i] & 0xff);
-         
-         if (i > 0)
-         {
-            if ((i % 8) == 7)
-               fputc(' ', handle->logFile);
-            
-            if ((i % 16) == 15)
-            {
-               /* Use isprint() to print the chars, then print offset after new
-                  line */
-               
-               fputc('|', handle->logFile);
-               
-               for (j = i - 15; j <= i; j++)
-                  if (isprint(str[j]))
-                     fputc(str[j], handle->logFile);
-                  else
-                     fputc('.', handle->logFile);
-               
-               fputc('|', handle->logFile);
-            }
-         }
-      }
-      
-      /* What if the hexdump didn't finish perfectly at (i % 16) == 0? */
-      
-      if ((i % 16) != 0)
-      {
-         /* Calculate the number of spaces to add to the ASCII area */
-         unsigned int spaces = (16 - (i % 16)) * 3 + 1;
-         
-         if ((i % 16) < 8)
-            spaces++;
-            /* Don't forget the space in the middle! */
-         
-         for (j = 0; j < spaces; j++)
+         if ((i % 8) == 7)
             fputc(' ', handle->logFile);
          
-         fputc('|', handle->logFile);
-         
-         for (j = i - (i % 16); j < i; j++)
-            if (isprint(str[j]))
-               fputc(str[j], handle->logFile);
-            else
-               fputc('.', handle->logFile);
-         
-         fputc('|', handle->logFile);
+         if ((i % 16) == 15)
+         {
+            /* Use isprint() to print the chars, then print offset after new
+               line */
+            
+            fputc('|', handle->logFile);
+            
+            for (j = i - 15; j <= i; j++)
+               if (isprint(str[j]))
+                  fputc(str[j], handle->logFile);
+               else
+                  fputc('.', handle->logFile);
+            
+            fputc('|', handle->logFile);
+         }
       }
-      
-      printf("\n\n");
    }
+   
+   /* What if the hexdump didn't finish perfectly at (i % 16) == 0? */
+   
+   if ((i % 16) != 0)
+   {
+      /* Calculate the number of spaces to add to the ASCII area */
+      unsigned int spaces = (16 - (i % 16)) * 3 + 1;
+      
+      if ((i % 16) < 8)
+         spaces++;
+         /* Don't forget the space in the middle! */
+      
+      for (j = 0; j < spaces; j++)
+         fputc(' ', handle->logFile);
+      
+      fputc('|', handle->logFile);
+      
+      for (j = i - (i % 16); j < i; j++)
+         if (isprint(str[j]))
+            fputc(str[j], handle->logFile);
+         else
+            fputc('.', handle->logFile);
+      
+      fputc('|', handle->logFile);
+   }
+   
+   fputc('\n', handle->logFile);
+      
+   _logPrintFooter(handle);
 }
 
 void m_logHexdumpz(const log_t* handle, const char* file, const int line,
