@@ -231,13 +231,12 @@ void _logPrintBody(const log_t* handle, const char* fmt, va_list ap)
    char logEntry[LOG_MAX_LEN];
    
    vsnprintf(logEntry, LOG_MAX_LEN, fmt, ap);
-   fprintf(handle->logFile, "%s\n", logEntry);
+   fprintf(handle->logFile, "%s", logEntry);
 }
 
 void _logPrintFooter(const log_t* handle)
 {
-   if (LOG_PTR_IS_FLAG(LOG_FLAG_LONG_MSG))
-      fprintf(handle->logFile, "\n");
+   fputc('\n', handle->logFile);
 }
 
 log_t* m_logInit(const char* fileName, const char* file, const int line,
@@ -409,8 +408,6 @@ void m_logHexdump(const log_t* handle, const char* file, const int line,
       fputc('|', handle->logFile);
    }
    
-   fputc('\n', handle->logFile);
-      
    _logPrintFooter(handle);
 }
 

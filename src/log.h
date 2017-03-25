@@ -256,8 +256,11 @@ void __logAssert(const log_t* handle, const char* file, const int line,
     ? (void) (0)                                                               \
     : __logAssert(handle, __FILE__, __LINE__, __func__, #cond))
 
+#ifndef __cplusplus
 /**
  * Allocate memory, or abort and print log message if out of memory
+ * 
+ * C only
  * 
  * @param handle Log handle pointer
  * @param file   Source file name (__FILE__ from LOG_ARGS)
@@ -272,6 +275,8 @@ void* m_logMalloc(const log_t* handle, const char* file, const int line,
 /**
  * Allocate memory, or abort and print log message if out of memory
  * 
+ * C only
+ * 
  * @param handle Log handle pointer
  * @param file   Source file name (__FILE__ from LOG_ARGS)
  * @param line   Source line number (__LINE__ from LOG_ARGS)
@@ -282,6 +287,7 @@ void* m_logMalloc(const log_t* handle, const char* file, const int line,
  */
 void* m_logRealloc(const log_t* handle, const char* file, const int line,
                    const char* func, void* ptr, size_t size);
+#endif
 
 #ifdef __cplusplus
 }

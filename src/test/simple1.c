@@ -24,18 +24,26 @@
 
 int main()
 {
+   int myInteger = 26;
+   const char* myString = "Sailor";
+   
    /* `m_logHandle' is a global log handle exported by the marlin library; you
     * may as well use it if you don't plan to have multiple handles. */
-   m_logHandle = m_logInit(NULL, LOG_ARGS, LOG_ALL, LOG_FLAG_ALL);
+   m_logHandle = m_logInit(NULL, LOG_ARGS, LOG_ALL,
+                           LOG_FLAG_ALL ^ LOG_FLAG_LONG_MSG);
    
    /* Note the use of the macro `LOG_ARGS' - this contains the source file, line
     * and function, in that order and passes them as the three arguments used
-    * by most functions. */
+    * by all functions (except the m_logAssert() macro). */
    
-   m_logPrint(m_logHandle, LOG_ARGS, LOG_INFO, "Hello world! My name is (%s)!",
-              "Adam");
+   m_logPrint(m_logHandle, LOG_ARGS, LOG_INFO, "Hello %s! My name is Adam and "
+              "I am %d years old", myString, myInteger);
    
-   m_logPrint(m_logHandle, LOG_ARGS, LOG_ERR, "Oh no! This is an error!");
+   m_logPrint(m_logHandle, LOG_ARGS, LOG_WARN, "I... am... angry!");
+   
+   m_logPrint(m_logHandle, LOG_ARGS, LOG_ERR, "Get outta here!!");
+   
+   m_logAssert(m_logHandle, "This is an assert; note the lack of LOG_ARGS!");
    
    m_logCleanup(m_logHandle, LOG_ARGS);
    

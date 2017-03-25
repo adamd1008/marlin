@@ -24,14 +24,17 @@
 
 int main()
 {
-   char* myString = "Ahoy sailor";
+   char* myString = "Ahoy, Sailor! Waiting patiently for Jai...";
    char mySecretCode[8] = {(char) 0x98, (char) 0x04, (char) 0x15, (char) 0x47,
                            (char) 0x32, (char) 0x64, (char) 0x00, (char) 0x17};
    
-   m_logHandle = m_logInit(NULL, LOG_ARGS, LOG_ALL, LOG_FLAG_ALL);
+   m_logHandle = m_logInit(NULL, LOG_ARGS, LOG_ALL,
+                           LOG_FLAG_ALL ^ LOG_FLAG_LONG_MSG);
    
+   /* The `z' in the name means the string is null-terminated. */
    m_logHexdumpz(m_logHandle, LOG_ARGS, LOG_INFO, myString);
    
+   /* We must provide the length of the string if not null-terminated! */
    m_logHexdump(m_logHandle, LOG_ARGS, LOG_WARN, mySecretCode, 8);
    
    m_logCleanup(m_logHandle, LOG_ARGS);
