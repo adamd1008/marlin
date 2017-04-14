@@ -89,9 +89,9 @@ logTime_t m_timeNow()
    ret.usec = tv.tv_usec;
 #elif defined(_WIN32)
    FILETIME time;
-   //ULONGLONG qwResult;
    ULARGE_INTEGER qwRes2;
-   GetSystemTimeAsFileTime(&time);
+
+   GetSystemTimePreciseAsFileTime(&time);
 
    qwRes2.HighPart = time.dwHighDateTime;
    qwRes2.LowPart = time.dwLowDateTime;
@@ -100,15 +100,6 @@ logTime_t m_timeNow()
 
    ret.sec = (long) (qwRes2.QuadPart / 1000000llu);
    ret.usec = (long) (qwRes2.QuadPart % 1000000llu);
-
-   //qwResult = (((ULONGLONG) time.dwHighDateTime) << 32) +
-   //           time.dwLowDateTime;
-
-   /* Convert from 100-nanoseconds to 1-microseconds */
-   //qwResult /= 10lu;
-
-   //ret.sec = (long int) qwResult / 1000000lu;
-   //ret.usec = (long int) qwResult % 1000000lu;
 #endif
    
    return ret;
