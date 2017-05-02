@@ -23,8 +23,6 @@
 #define _DEFAULT_SOURCE
 #define _POSIX_SOURCE
 #define _GNU_SOURCE
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
@@ -226,14 +224,6 @@ void _logPrintHeader(const log_t* handle, const char* file, const int line,
    }
 }
 
-void _logPrintBody(const log_t* handle, const char* fmt, va_list ap)
-{
-   char logEntry[LOG_MAX_LEN];
-   
-   vsnprintf(logEntry, LOG_MAX_LEN, fmt, ap);
-   fprintf(handle->logFile, "%s", logEntry);
-}
-
 void _logPrintFooter(const log_t* handle)
 {
    fputc('\n', handle->logFile);
@@ -313,9 +303,18 @@ void m_logPrint(const log_t* handle, const char* file, const int line,
    _logPrintHeader(handle, file, line, func, logLevel);
    
    va_start(ap, fmt);
-   _logPrintBody(handle, fmt, ap);
+   m_logPrintBodyVA(handle, fmt, ap);
    va_end(ap);
    
+   _logPrintFooter(handle);
+}
+
+void m_logPrintVA(const log_t* handle, const char* file, const int line,
+                  const char* func, const int logLevel, const char* fmt,
+                  va_list ap)
+{
+   _logPrintHeader(handle, file, line, func, logLevel);
+   m_logPrintBodyVA(handle, fmt, ap);
    _logPrintFooter(handle);
 }
 
@@ -330,8 +329,16 @@ void m_logPrintBody(const log_t* handle, const char* fmt, ...)
    va_list ap;
    
    va_start(ap, fmt);
-   _logPrintBody(handle, fmt, ap);
+   m_logPrintBodyVA(handle, fmt, ap);
    va_end(ap);
+}
+
+void m_logPrintBodyVA(const log_t* handle, const char* fmt, va_list ap)
+{
+   char logEntry[LOG_MAX_LEN];
+
+   vsnprintf(logEntry, LOG_MAX_LEN, fmt, ap);
+   fprintf(handle->logFile, "%s", logEntry);
 }
 
 void m_logPrintFooter(const log_t* handle)

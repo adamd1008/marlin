@@ -42,6 +42,8 @@
 #define LOG_L2                0x0020
 #define LOG_L3                0x0040
 #define LOG_ALL               0xffff
+#define LOG_BASIC             0x000f
+#define LOG_VERBOSE           0x00ff
 
 #define LOG_FLAG_NONE            0x0000
 #define LOG_FLAG_CLOEXEC         0x0001
@@ -108,6 +110,21 @@ void m_logPrint(const log_t* handle, const char* file, const int line,
                 const char* func, const int logLevel, const char* fmt, ...);
 
 /**
+* Print a variadic message to the log file
+*
+* @param handle   Log handle pointer
+* @param file     Source file name (__FILE__ from LOG_ARGS)
+* @param line     Source line number (__LINE__ from LOG_ARGS)
+* @param func     Current function (__func__ from LOG_ARGS)
+* @param logLevel Log level of this message
+* @param fmt      Variadic message format
+* @param ap       Variadic arguments
+*/
+void m_logPrintVA(const log_t* handle, const char* file, const int line,
+                  const char* func, const int logLevel, const char* fmt,
+                  va_list ap);
+
+/**
  * Print the header of a log message; use `m_logPrintBody()` and
  * `m_logPrintFooter()` to construct the full log message
  * 
@@ -128,6 +145,15 @@ void m_logPrintHeader(const log_t* handle, const char* file, const int line,
  * @param ...      Variadic arguments
  */
 void m_logPrintBody(const log_t* handle, const char* fmt, ...);
+
+/**
+* Segmented print to the log file
+*
+* @param handle   Log handle pointer
+* @param fmt      Variadic message format
+* @param ap       Variadic arguments
+*/
+void m_logPrintBodyVA(const log_t* handle, const char* fmt, va_list ap);
 
 /**
  * Finalise a segmented log message
