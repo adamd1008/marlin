@@ -23,7 +23,6 @@
 #define _DEFAULT_SOURCE
 #define _POSIX_SOURCE
 #define _GNU_SOURCE
-#include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
