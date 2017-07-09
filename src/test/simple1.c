@@ -47,5 +47,9 @@ int main()
    
    m_logCleanup(m_logHandle, LOG_ARGS);
    
+#ifdef _WIN32
+   system("pause");
+#endif
+
    return 0;
 }
