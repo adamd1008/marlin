@@ -177,7 +177,7 @@ void _logPrintHeader(const log_t* handle, const char* file, const int line,
                       ">>>>>>>>>>>>>>>>>>>>>>>>>>>\n")) < 0)
             abort();
          
-         fullDateTime = localtime(&timeNow.sec);
+         fullDateTime = localtime((time_t*) &timeNow.sec);
          strftime(fullDateTimeStr, 30, "%Y/%m/%d %H:%M:%S", fullDateTime);
          
          if (LOG_PTR_IS_FLAG(LOG_FLAG_SRC_INFO))

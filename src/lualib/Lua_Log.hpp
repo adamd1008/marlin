@@ -68,11 +68,17 @@ private:
    bool _free;
 };
 
+#ifdef _WIN32
+#define DLL_EXPORT __declspec(dllexport)
+#else
+#define DLL_EXPORT
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int luaopen_libmarlinlua(lua_State* L);
+DLL_EXPORT int luaopen_libmarlinlua(lua_State* L);
 
 #ifdef __cplusplus
 }

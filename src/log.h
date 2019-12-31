@@ -32,7 +32,7 @@
 #include <sys/time.h>
 #elif defined(_WIN32)
 #include <Windows.h>
-#define __func__ __FUNCDNAME__
+#define __func__ __FUNCTION__
 #endif
 
 #define LOG_INFO              0x0000
