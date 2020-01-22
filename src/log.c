@@ -565,6 +565,11 @@ void* m_logRealloc(const log_t* handle, const char* file, const int line,
    return ret;
 }
 
+void m_logFlush(const log_t* handle)
+{
+    fflush(handle->logFile);
+}
+
 #ifdef _WIN32
 #pragma warning(pop)
 #endif

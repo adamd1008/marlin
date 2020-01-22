@@ -283,6 +283,13 @@ void __logAssert(const log_t* handle, const char* file, const int line,
     ? (void) (0)                                                               \
     : __logAssert(handle, __FILE__, __LINE__, __func__, #cond))
 
+ /**
+ * Flush log file stream
+ * 
+ * @param handle Log handle pointer
+ */
+void m_logFlush(const log_t* handle);
+
 #ifndef __cplusplus
 /**
  * Allocate memory, or abort and print log message if out of memory
